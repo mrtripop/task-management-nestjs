@@ -2,9 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TaskStatus } from './tasks-status.enum';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { TasksRepository } from './task.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Task } from './task.entity';
 
 @Injectable()
 export class TasksService {
+  constructor(
+    @InjectRepository(Task)
+    private tasksRepository: TasksRepository,
+  ) {}
   // getAllTasks(): Task[] {
   //   return this.tasks;
   // }
@@ -24,16 +31,17 @@ export class TasksService {
   //   }
   //   return tasks;
   // }
-  // getTaskById(id: string): Task {
-  //   // try to get task
-  //   const found = this.tasks.find((task) => task.id === id);
-  //   // if not found, throw an error (404 not found)
-  //   if (!found) {
-  //     throw new NotFoundException(`Task with Id ${id} not found`);
-  //   }
-  //   // otherwise, return found task
-  //   return found;
-  // }
+
+  async getTaskById(id: string): Promise<Task> {
+    const found = await this.tasksRepository.findOne({ where: { id: id } });
+
+    if (!found) {
+      throw new NotFoundException(`Task with Id ${id} not found`);
+    }
+
+    return found;
+  }
+
   // createTask(createTaskdDto: CreateTaskDto): Task {
   //   const { title, description } = createTaskdDto;
   //   const task: Task = {
